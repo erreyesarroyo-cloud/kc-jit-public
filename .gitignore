@@ -1,0 +1,17 @@
+# Secrets — never commit
+.env
+*.env
+!.env.example
+
+# Phase 0 runtime artifacts
+*.token
+phase0/.last_run
+
+# Phase 1+ engine (Go)
+/bin/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
