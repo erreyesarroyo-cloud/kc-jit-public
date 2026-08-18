@@ -1,0 +1,9 @@
+prefix   = "kc-pim"
+location = "eastus"
+
+# Keep at 1 x B2s for free-tier / low-cost labs
+node_count = 1
+vm_size    = "Standard_B2s"
+
+# Optional pin, e.g. "1.31.2" — leave null for Azure default
+# kubernetes_version = "1.31.2"

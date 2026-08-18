@@ -9,9 +9,19 @@ phase0/.last_run
 
 # Phase 1+ engine (Go)
 /bin/
+phase1/pf.out
+phase1/pf.err
 *.db
 *.sqlite
 *.sqlite3
+
+# Terraform
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/crash.log
+**/terraform.tfvars
+!**/terraform.tfvars.example
 
 # OS
 .DS_Store

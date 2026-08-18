@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keycloak PIM</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Keycloak PIM</div>
+    <div id="who" class="who">…</div>
+  </header>
+  <main>
+    <section id="gate" class="panel hidden">
+      <p>Sign in with Keycloak to request or approve elevation.</p>
+      <a class="btn" href="/auth/login">Sign in</a>
+      <p class="hint">Lab fallback: set username below (header auth) if OIDC is off.</p>
+      <label>username <input id="labActor" placeholder="" autocomplete="username" /></label>
+      <button class="btn secondary" id="labGo">Continue</button>
+    </section>
+
+    <section id="app" class="hidden">
+      <div class="grid">
+        <section class="panel" id="requestPanel">
+          <h2>Request elevation</h2>
+          <p class="muted" id="eligibleHint"></p>
+          <label>Justification / details <span class="hint">(required)</span>
+            <textarea id="justification" rows="3" placeholder="Why do you need admin-active? Be specific." required></textarea>
+          </label>
+          <button class="btn" id="btnRequest">Submit request</button>
+          <p id="requestMsg" class="msg"></p>
+        </section>
+
+        <section class="panel">
+          <h2>Your status</h2>
+          <ul id="statusList" class="status"></ul>
+          <button type="button" class="btn secondary" id="btnLogout">Sign out</button>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>Requests</h2>
+        <div id="requests" class="table-wrap">Loading…</div>
+      </section>
+
+      <section class="panel">
+        <h2>Elevation ledger</h2>
+        <p class="muted">User · request time · justification · approver · approval time · notes/guidance</p>
+        <button class="btn secondary" id="btnAudit">Refresh</button>
+        <div id="audit" class="table-wrap">—</div>
+      </section>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

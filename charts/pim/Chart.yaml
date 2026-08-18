@@ -1,0 +1,6 @@
+apiVersion: v2
+name: pim
+description: Keycloak PIM Phase 1 API (request / approve / elevate / revoke)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

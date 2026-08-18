@@ -1,0 +1,66 @@
+# Lab defaults — start-dev on a single replica (not production HA).
+
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.3.3"
+  pullPolicy: IfNotPresent
+
+# HTTP only behind Service/LB for lab. Terminate TLS at Ingress later if needed.
+httpPort: 8080
+# Keycloak 25+ serves /health on the management interface (not httpPort).
+managementPort: 9000
+
+admin:
+  username: admin
+  # Set via --set admin.password=... or existingSecret. Do not commit real passwords.
+  password: "ChangeMe-LabOnly!"
+  existingSecret: ""
+  existingSecretUserKey: username
+  existingSecretPasswordKey: password
+
+# start-dev = embedded DB, fine for Phase 0 plumbing on free-tier AKS.
+# Switch to "start" + external DB before any real use.
+command:
+  - start-dev
+
+extraArgs:
+  - --http-enabled=true
+  - --hostname-strict=false
+  - --health-enabled=true
+
+service:
+  type: LoadBalancer
+  port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1536Mi
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Ingress (preferred with nginx). When enabled, set service.type=ClusterIP.
+ingress:
+  enabled: false
+  className: nginx
+  # Lab: keycloak.<ingress-ip>.nip.io (must differ from PIM catch-all host)
+  host: keycloak.local
+  annotations: {}
+  tls: []

@@ -111,6 +111,9 @@ echo ">> Ensuring users..."
 ensure_user "${LEAD_USERNAME}"       "${LEAD_PASSWORD}"
 ensure_user "${ADMIN_USERNAME}"      "${ADMIN_PASSWORD}"
 ensure_user "${ADMIN2_USERNAME}"     "${ADMIN2_PASSWORD}"
+PERMANENT_USERNAME="${PERMANENT_USERNAME:-permanent1}"
+PERMANENT_PASSWORD="${PERMANENT_PASSWORD:-${FIXTURE_PASSWORD}}"
+ensure_user "${PERMANENT_USERNAME}"  "${PERMANENT_PASSWORD}"
 ensure_user "${BREAKGLASS_USERNAME}" "${BREAKGLASS_PASSWORD}"
 
 # ---- PIM service-account client (least privilege) ----------------------------
@@ -238,15 +241,25 @@ BG_GID=$(ensure_group "${GROUP_BREAKGLASS}")
 grant_group_client_role "${BG_GID}" "realm-admin"
 add_user_to_group "${BREAKGLASS_USERNAME}" "${BG_GID}"
 
-echo ">> Ensuring group '${GROUP_ADMIN_ACTIVE}' (standing ${TEST_ROLE})..."
+# JIT elevation target: realm-admin via group. No standing members at setup time.
+echo ">> Ensuring group '${GROUP_ADMIN_ACTIVE}' (JIT elevation -> realm-admin)..."
 AA_GID=$(ensure_group "${GROUP_ADMIN_ACTIVE}")
+grant_group_client_role "${AA_GID}" "realm-admin"
+# Keep TEST_ROLE on the group too so Phase 0 plumbing can still prove role inheritance if needed.
 grant_group_realm_role "${AA_GID}" "${TEST_ROLE}"
-add_user_to_group "${LEAD_USERNAME}" "${AA_GID}"
 
 echo ">> Ensuring group '${GROUP_ADMIN_ELIGIBLE}' (eligible, no standing roles)..."
 AE_GID=$(ensure_group "${GROUP_ADMIN_ELIGIBLE}")
+add_user_to_group "${LEAD_USERNAME}"   "${AE_GID}"
 add_user_to_group "${ADMIN_USERNAME}"  "${AE_GID}"
 add_user_to_group "${ADMIN2_USERNAME}" "${AE_GID}"
+
+# Approvers (day-to-day standing admin). Distinct from break-glass (emergency).
+GROUP_ADMIN_PERMANENT="${GROUP_ADMIN_PERMANENT:-admin-permanent}"
+echo ">> Ensuring group '${GROUP_ADMIN_PERMANENT}' (standing realm-admin / approvers)..."
+AP_GID=$(ensure_group "${GROUP_ADMIN_PERMANENT}")
+grant_group_client_role "${AP_GID}" "realm-admin"
+add_user_to_group "${PERMANENT_USERNAME}" "${AP_GID}"
 
 # ---- Persist the client secret back into .env -------------------------------
 if grep -q '^PIM_CLIENT_SECRET=' "$ENV_FILE"; then
@@ -256,12 +269,65 @@ else
 fi
 echo ">> PIM_CLIENT_SECRET written to .env"
 
+# ---- PIM web OIDC client (Phase 3 UI login) ----------------------------------
+OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-pim-web}"
+# Lab redirects: local port-forward + in-cluster service hostname (optional).
+OIDC_REDIRECT_URIS="${OIDC_REDIRECT_URIS:-[\"http://127.0.0.1:8081/auth/callback\",\"http://localhost:8081/auth/callback\"]}"
+echo ">> Ensuring PIM web OIDC client '${OIDC_CLIENT_ID}'..."
+WEB_CID=$(curl -sf "${AH[@]}" "${API}/clients?clientId=${OIDC_CLIENT_ID}" | jq -r '.[0].id // empty')
+if [[ -z "$WEB_CID" ]]; then
+  curl -sf "${AH[@]}" -X POST "${API}/clients" -d "{
+    \"clientId\":\"${OIDC_CLIENT_ID}\",
+    \"enabled\":true,
+    \"publicClient\":false,
+    \"secret\":\"\",
+    \"serviceAccountsEnabled\":false,
+    \"standardFlowEnabled\":true,
+    \"directAccessGrantsEnabled\":false,
+    \"redirectUris\":${OIDC_REDIRECT_URIS},
+    \"webOrigins\":[\"+\"],
+    \"attributes\":{\"pkce.code.challenge.method\":\"S256\"}
+  }"
+  WEB_CID=$(curl -sf "${AH[@]}" "${API}/clients?clientId=${OIDC_CLIENT_ID}" | jq -r '.[0].id')
+  echo "   pim-web client created (${WEB_CID})"
+else
+  curl -sf "${AH[@]}" -X PUT "${API}/clients/${WEB_CID}" -d "{
+    \"id\":\"${WEB_CID}\",
+    \"clientId\":\"${OIDC_CLIENT_ID}\",
+    \"enabled\":true,
+    \"publicClient\":false,
+    \"serviceAccountsEnabled\":false,
+    \"standardFlowEnabled\":true,
+    \"directAccessGrantsEnabled\":false,
+    \"redirectUris\":${OIDC_REDIRECT_URIS},
+    \"webOrigins\":[\"+\"],
+    \"attributes\":{\"pkce.code.challenge.method\":\"S256\"}
+  }"
+  echo "   pim-web client updated (${WEB_CID})"
+fi
+WEB_SECRET=$(curl -sf "${AH[@]}" "${API}/clients/${WEB_CID}/client-secret" | jq -r '.value // empty')
+if [[ -z "$WEB_SECRET" || "$WEB_SECRET" == "null" ]]; then
+  WEB_SECRET=$(curl -sf "${AH[@]}" -X POST "${API}/clients/${WEB_CID}/client-secret" | jq -r '.value')
+fi
+if grep -q '^OIDC_CLIENT_SECRET=' "$ENV_FILE"; then
+  sed -i "s|^OIDC_CLIENT_SECRET=.*|OIDC_CLIENT_SECRET=\"${WEB_SECRET}\"|" "$ENV_FILE"
+else
+  echo "OIDC_CLIENT_SECRET=\"${WEB_SECRET}\"" >> "$ENV_FILE"
+fi
+if grep -q '^OIDC_CLIENT_ID=' "$ENV_FILE"; then
+  sed -i "s|^OIDC_CLIENT_ID=.*|OIDC_CLIENT_ID=\"${OIDC_CLIENT_ID}\"|" "$ENV_FILE"
+else
+  echo "OIDC_CLIENT_ID=\"${OIDC_CLIENT_ID}\"" >> "$ENV_FILE"
+fi
+echo ">> OIDC_CLIENT_SECRET written to .env"
+
 echo ""
 echo "SETUP COMPLETE."
 echo "  realm         = ${KC_REALM}"
 echo "  kc version    = ${KC_VERSION}"
 echo "  test role     = ${TEST_ROLE}"
-echo "  users         = ${LEAD_USERNAME}, ${ADMIN_USERNAME}, ${ADMIN2_USERNAME}, ${BREAKGLASS_USERNAME}"
-echo "  groups        = ${GROUP_BREAKGLASS} (realm-admin), ${GROUP_ADMIN_ACTIVE} (${TEST_ROLE}), ${GROUP_ADMIN_ELIGIBLE} (no roles)"
+echo "  users         = ${LEAD_USERNAME}, ${ADMIN_USERNAME}, ${ADMIN2_USERNAME}, ${PERMANENT_USERNAME}, ${BREAKGLASS_USERNAME}"
+echo "  groups        = ${GROUP_BREAKGLASS} (realm-admin), ${GROUP_ADMIN_ACTIVE} (JIT realm-admin), ${GROUP_ADMIN_ELIGIBLE} (no roles), ${GROUP_ADMIN_PERMANENT} (approvers)"
 echo "  pim client    = ${PIM_CLIENT_ID} (view-users, manage-users, view-realm, query-users, query-clients)"
+echo "  web client    = ${OIDC_CLIENT_ID} (standard flow / UI login)"
 echo "Next: run ./plumbing_test.sh"

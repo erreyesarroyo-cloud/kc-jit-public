@@ -95,43 +95,78 @@ else
   bad "break-glass admin authority skipped (no token)"
 fi
 
-# ---- [8] Active/Eligible group model — effective role mappings --------------
-# superadmin1 (in admin-active) must have TEST_ROLE via group inheritance.
-# admin1 & admin2 (in admin-eligible) must have NO standing custom roles.
-# This proves the Active/Eligible model is wired the way PHASES.md expects.
-echo ">> [8] Verifying Active/Eligible group model..."
+# ---- [8] Group model (eligible / permanent / active) ------------------------
+# permanent1 must be in admin-permanent.
+# eligible users must NOT be in admin-active and must not have standing TEST_ROLE.
+# admin-active is the JIT elevation target (empty at rest).
+echo ">> [8] Verifying Eligible / Permanent / Active group model..."
 
-# helper: composite of effective realm role names for a user
+PERMANENT_USERNAME="${PERMANENT_USERNAME:-permanent1}"
+GROUP_ADMIN_PERMANENT="${GROUP_ADMIN_PERMANENT:-admin-permanent}"
+GROUP_ADMIN_ACTIVE="${GROUP_ADMIN_ACTIVE:-admin-active}"
+GROUP_ADMIN_ELIGIBLE="${GROUP_ADMIN_ELIGIBLE:-admin-eligible}"
+
+user_group_names() {
+  local uid="$1"
+  curl -sf "${PH[@]}" "${API}/users/${uid}/groups" | jq -r '.[].name' 2>/dev/null | sort -u
+}
+
 effective_realm_role_names() {
   local uid="$1"
-  # /role-mappings returns { realmMappings, clientMappings }
-  # /role-mappings/realm/composite returns effective realm roles incl. group inheritance
   curl -sf "${PH[@]}" "${API}/users/${uid}/role-mappings/realm/composite" \
     | jq -r '[.[].name] // [] | .[]' 2>/dev/null | sort -u
 }
 
-# superadmin1 -> must include TEST_ROLE (inherited from admin-active group)
-LEAD_UID=$(curl -sf "${PH[@]}" "${API}/users?username=${LEAD_USERNAME}&exact=true" | jq -r '.[0].id // empty')
-if [[ -n "$LEAD_UID" ]]; then
-  if effective_realm_role_names "$LEAD_UID" | grep -qx "${TEST_ROLE}"; then
-    ok "${LEAD_USERNAME} has '${TEST_ROLE}' via admin-active group"
+PERM_UID=$(curl -sf "${PH[@]}" "${API}/users?username=${PERMANENT_USERNAME}&exact=true" | jq -r '.[0].id // empty')
+if [[ -n "$PERM_UID" ]]; then
+  if user_group_names "$PERM_UID" | grep -qx "${GROUP_ADMIN_PERMANENT}"; then
+    ok "${PERMANENT_USERNAME} is in ${GROUP_ADMIN_PERMANENT}"
   else
-    bad "${LEAD_USERNAME} MISSING '${TEST_ROLE}' (expected via admin-active group)"
+    bad "${PERMANENT_USERNAME} not in ${GROUP_ADMIN_PERMANENT}"
   fi
 else
-  bad "cannot look up ${LEAD_USERNAME}"
+  bad "cannot look up ${PERMANENT_USERNAME}"
 fi
 
-# admin1 & admin2 -> must NOT have TEST_ROLE standing (they're only eligible)
-for u in "${ADMIN_USERNAME}" "${ADMIN2_USERNAME}"; do
+for u in "${LEAD_USERNAME}" "${ADMIN_USERNAME}" "${ADMIN2_USERNAME}"; do
   UID_=$(curl -sf "${PH[@]}" "${API}/users?username=${u}&exact=true" | jq -r '.[0].id // empty')
   if [[ -z "$UID_" ]]; then bad "cannot look up ${u}"; continue; fi
-  if effective_realm_role_names "$UID_" | grep -qx "${TEST_ROLE}"; then
-    bad "${u} unexpectedly has standing '${TEST_ROLE}' (should be eligible-only)"
+  if user_group_names "$UID_" | grep -qx "${GROUP_ADMIN_ELIGIBLE}"; then
+    ok "${u} is in ${GROUP_ADMIN_ELIGIBLE}"
   else
-    ok "${u} has no standing '${TEST_ROLE}' (eligible-only, as designed)"
+    bad "${u} not in ${GROUP_ADMIN_ELIGIBLE}"
+  fi
+  if user_group_names "$UID_" | grep -qx "${GROUP_ADMIN_ACTIVE}"; then
+    bad "${u} unexpectedly in ${GROUP_ADMIN_ACTIVE} (should be empty at rest)"
+  else
+    ok "${u} not in ${GROUP_ADMIN_ACTIVE} (at rest)"
+  fi
+  if effective_realm_role_names "$UID_" | grep -qx "${TEST_ROLE}"; then
+    bad "${u} unexpectedly has standing '${TEST_ROLE}'"
+  else
+    ok "${u} has no standing '${TEST_ROLE}'"
   fi
 done
+
+# ---- [9] JIT group add/remove via service account ---------------------------
+echo ">> [9] Verifying service account can add/remove ${GROUP_ADMIN_ACTIVE}..."
+AA_GID=$(curl -sf "${PH[@]}" "${API}/groups?search=${GROUP_ADMIN_ACTIVE}&exact=true" | jq -r '.[0].id // empty')
+if [[ -z "$AA_GID" ]]; then
+  bad "cannot find group ${GROUP_ADMIN_ACTIVE}"
+else
+  curl -sf "${PH[@]}" -X PUT "${API}/users/${ADMIN_UID}/groups/${AA_GID}" >/dev/null
+  if user_group_names "$ADMIN_UID" | grep -qx "${GROUP_ADMIN_ACTIVE}"; then
+    ok "added ${ADMIN_USERNAME} to ${GROUP_ADMIN_ACTIVE}"
+  else
+    bad "failed to add ${ADMIN_USERNAME} to ${GROUP_ADMIN_ACTIVE}"
+  fi
+  curl -sf "${PH[@]}" -X DELETE "${API}/users/${ADMIN_UID}/groups/${AA_GID}" >/dev/null
+  if user_group_names "$ADMIN_UID" | grep -qx "${GROUP_ADMIN_ACTIVE}"; then
+    bad "${ADMIN_USERNAME} still in ${GROUP_ADMIN_ACTIVE} after remove"
+  else
+    ok "removed ${ADMIN_USERNAME} from ${GROUP_ADMIN_ACTIVE}"
+  fi
+fi
 
 echo ""
 if [[ "$FAIL" -eq 0 ]]; then

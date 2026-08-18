@@ -1,0 +1,12 @@
+apiVersion: v2
+name: keycloak
+description: Lab Keycloak chart for the Keycloak PIM access cluster (AKS free-tier)
+type: application
+version: 0.1.0
+appVersion: "26.3.3"
+keywords:
+  - keycloak
+  - identity
+  - pim
+maintainers:
+  - name: jade-paas
