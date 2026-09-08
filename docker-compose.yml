@@ -13,7 +13,9 @@
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
+    build:
+      context: ./examples
+      dockerfile: ../deploy/quickstart/Dockerfile.keycloak
     command: ["start-dev", "--import-realm"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -21,13 +23,13 @@ services:
       KC_HEALTH_ENABLED: "true"
     ports:
       - "8080:8080"
-    volumes:
-      - ./examples/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/pim-test HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      # Keycloak's management health endpoint (port 9000) reports readiness.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '\"status\": \"UP\"'"]
       interval: 5s
       timeout: 5s
       retries: 40
+      start_period: 20s
 
   # Grants the pim-service service account the least-privilege realm-management
   # roles it needs, then exits. Uses the kcadm CLI bundled in the Keycloak image.

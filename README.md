@@ -98,6 +98,14 @@ Then open:
 Demo users are created by the realm import (see `examples/realm-export.json`).
 Log in as an eligible user, request elevation, then log in as an approver to grant it.
 
+| User    | Password   | Role                                   |
+|---------|------------|----------------------------------------|
+| `alice` | `password` | `admin-eligible` — can request access  |
+| `bob`   | `password` | `admin-permanent` — can approve        |
+
+The quickstart runs with OIDC login enabled (`ALLOW_HEADER_AUTH=false`), so use
+the web UI to log in — that's the realistic flow.
+
 Tear down with `docker compose down -v`.
 
 ## Configuration
@@ -117,6 +125,7 @@ All configuration is via environment variables:
 | `OIDC_ENABLED`          | `true`                           | Enable OIDC login for the UI                       |
 | `OIDC_CLIENT_ID`        | `pim-web`                        | Public/confidential client for user login          |
 | `OIDC_CLIENT_SECRET`    | (empty)                          | Secret for the web client                          |
+| `ALLOW_HEADER_AUTH`     | `true`                           | Trust `X-Actor-Username` header (**set `false` in production**; use OIDC) |
 | `SESSION_SECRET`        | `lab-only-change-me`             | **Change in production**                           |
 | `NOTIFY_WEBHOOK_URL`    | (empty)                          | Optional webhook for approver notifications        |
 | `GROUP_ADMIN_ELIGIBLE`  | `admin-eligible`                 | Eligible group name                                |

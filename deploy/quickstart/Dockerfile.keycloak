@@ -1,0 +1,6 @@
+# Quickstart Keycloak image: stock Keycloak with the demo realm baked in.
+# Baking the realm (rather than bind-mounting it) keeps `docker compose up`
+# working in every environment, including Docker-in-Docker where the daemon
+# cannot see the host's source tree.
+FROM quay.io/keycloak/keycloak:26.0
+COPY realm-export.json /opt/keycloak/data/import/realm-export.json
