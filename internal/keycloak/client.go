@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/config"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/config"
 )
 
 type Client struct {

@@ -1,0 +1,63 @@
+{
+  "realm": "pim-test",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "groups": [
+    { "name": "admin-eligible" },
+    { "name": "admin-permanent" },
+    { "name": "admin-active" },
+    { "name": "break-glass" }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "admin-power", "description": "Sensitive role gated by JIT elevation" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "pim-service",
+      "name": "keycloak-jit-access service account",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "pim-service-secret",
+      "description": "Confidential client used by keycloak-jit-access to manage group membership."
+    },
+    {
+      "clientId": "pim-web",
+      "name": "keycloak-jit-access web UI",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "secret": "pim-web-secret",
+      "redirectUris": ["http://localhost:8081/*"],
+      "webOrigins": ["http://localhost:8081"]
+    }
+  ],
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Eligible",
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "password", "temporary": false }],
+      "groups": ["/admin-eligible"]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Approver",
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "password", "temporary": false }],
+      "groups": ["/admin-permanent"]
+    }
+  ]
+}

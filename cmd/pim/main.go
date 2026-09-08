@@ -9,13 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/api"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/auth"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/config"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/keycloak"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/notify"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/store"
-	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/worker"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/api"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/auth"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/config"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/keycloak"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/notify"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/store"
+	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/worker"
 )
 
 func main() {

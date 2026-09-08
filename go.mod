@@ -1,4 +1,4 @@
-module github.com/erreyesarroyo-cloud/keycloak-pim-extension
+module github.com/erreyesarroyo-cloud/keycloak-jit-access
 
 go 1.26
 

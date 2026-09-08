@@ -1,0 +1,84 @@
+# Docker Compose quickstart for keycloak-jit-access.
+#
+#   docker compose up --build
+#
+#   JIT Access UI:            http://localhost:8081
+#   Keycloak admin console:   http://localhost:8080  (admin / admin)
+#
+# Demo users (realm "pim-test", password "password"):
+#   alice  -> admin-eligible   (can request elevation)
+#   bob    -> admin-permanent  (can approve)
+#
+# This stack is for evaluation only. Do not use these secrets in production.
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./examples/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/pim-test HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
+  # Grants the pim-service service account the least-privilege realm-management
+  # roles it needs, then exits. Uses the kcadm CLI bundled in the Keycloak image.
+  kc-init:
+    image: quay.io/keycloak/keycloak:26.0
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        KCADM=/opt/keycloak/bin/kcadm.sh
+        $$KCADM config credentials --server http://keycloak:8080 --realm master --user admin --password admin
+        SA_USER=$$($$KCADM get clients -r pim-test -q clientId=pim-service --fields id --format csv --noquotes | tail -n1)
+        echo "pim-service client id: $$SA_USER"
+        for role in view-users manage-users query-groups; do
+          $$KCADM add-roles -r pim-test \
+            --uusername service-account-pim-service \
+            --cclientid realm-management --rolename $$role
+          echo "granted $$role"
+        done
+        echo "service account roles granted"
+
+  jit-access:
+    build: .
+    depends_on:
+      kc-init:
+        condition: service_completed_successfully
+    environment:
+      LISTEN_ADDR: ":8080"
+      PUBLIC_URL: "http://localhost:8081"
+      DB_PATH: "/data/pim.db"
+      KC_BASE_URL: "http://keycloak:8080"
+      KC_PUBLIC_URL: "http://localhost:8080"
+      KC_REALM: "pim-test"
+      PIM_CLIENT_ID: "pim-service"
+      PIM_CLIENT_SECRET: "pim-service-secret"
+      OIDC_ENABLED: "true"
+      OIDC_CLIENT_ID: "pim-web"
+      OIDC_CLIENT_SECRET: "pim-web-secret"
+      OIDC_REDIRECT_URL: "http://localhost:8081/auth/callback"
+      SESSION_SECRET: "demo-only-change-me"
+      ALLOW_HEADER_AUTH: "false"
+      REQUEST_TTL: "1h"
+      ACTIVE_TTL: "9h"
+      POLL_INTERVAL: "30s"
+    ports:
+      - "8081:8080"
+    volumes:
+      - jit-data:/data
+
+volumes:
+  jit-data:
