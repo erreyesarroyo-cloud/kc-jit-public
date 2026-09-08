@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jadeuc/keycloak-pim/internal/store"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/store"
 )
 
 // Notifier sends lifecycle alerts (Slack/Teams-style incoming webhooks).

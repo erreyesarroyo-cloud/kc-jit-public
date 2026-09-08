@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/jadeuc/keycloak-pim/internal/api"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/api"
 )
 
 func Run(ctx context.Context, svc *api.Service, every time.Duration) {

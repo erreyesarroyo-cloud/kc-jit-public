@@ -10,7 +10,7 @@ group model, and validate the test fixtures — before building any PIM logic.
 
 | Item | Decision |
 |------|----------|
-| Target | `https://kc.staging.jadeuc.com`, realm **`pim-test`** (ALL calls scoped here) |
+| Target | `https://kc.staging.example.com`, realm **`pim-test`** (ALL calls scoped here) |
 | Active persona (standing role) | `superadmin1` — in group `admin-active`, holds `pim-test-role` permanently |
 | Eligible personas (PIM-activatable) | `admin1`, `admin2` — in group `admin-eligible`, hold nothing standing |
 | Break-glass (permanent full-realm admin) | `breakglass1` — in group `break-glass`, holds `realm-admin` |

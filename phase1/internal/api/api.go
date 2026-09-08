@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jadeuc/keycloak-pim/internal/auth"
-	"github.com/jadeuc/keycloak-pim/internal/config"
-	"github.com/jadeuc/keycloak-pim/internal/keycloak"
-	"github.com/jadeuc/keycloak-pim/internal/notify"
-	"github.com/jadeuc/keycloak-pim/internal/store"
-	"github.com/jadeuc/keycloak-pim/internal/ui"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/auth"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/config"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/keycloak"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/notify"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/store"
+	"github.com/erreyesarroyo-cloud/keycloak-pim-extension/internal/ui"
 )
 
 type Service struct {
