@@ -8,8 +8,8 @@ and pull requests.
 Prerequisites: Go 1.26+, Docker (for the compose quickstart).
 
 ```bash
-git clone https://github.com/erreyesarroyo-cloud/keycloak-jit-access.git
-cd keycloak-jit-access
+git clone https://github.com/erreyesarroyo-cloud/kc-jit-public.git
+cd kc-jit-public
 go build ./...
 go vet ./...
 go test ./...

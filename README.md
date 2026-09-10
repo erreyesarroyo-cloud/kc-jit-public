@@ -2,6 +2,8 @@
 
 **Just-in-time, time-bound, approved admin access for Keycloak.**
 
+The GitHub repository is [`kc-jit-public`](https://github.com/erreyesarroyo-cloud/kc-jit-public); the project and Go module are named `keycloak-jit-access`.
+
 `keycloak-jit-access` is a small companion service that brings an Azure-PIM-style
 workflow to [Keycloak](https://www.keycloak.org/): nobody holds standing admin
 rights. Instead, eligible users **request** elevation, an approver **grants** it,
@@ -85,8 +87,8 @@ groups + a service-account client, and runs the service — so you can see the f
 flow in a couple of minutes.
 
 ```bash
-git clone https://github.com/erreyesarroyo-cloud/keycloak-jit-access.git
-cd keycloak-jit-access
+git clone https://github.com/erreyesarroyo-cloud/kc-jit-public.git
+cd kc-jit-public
 docker compose up --build
 ```
 
