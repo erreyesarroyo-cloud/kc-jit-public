@@ -16,21 +16,27 @@ import (
 
 	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/auth"
 	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/config"
-	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/keycloak"
 	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/notify"
 	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/store"
 	"github.com/erreyesarroyo-cloud/keycloak-jit-access/internal/ui"
 )
 
+// Groups is the Keycloak membership API used for eligibility, approval, and revoke.
+type Groups interface {
+	InGroup(username, groupName string) (bool, error)
+	AddToGroup(username, groupName string) error
+	RemoveFromGroup(username, groupName string) error
+}
+
 type Service struct {
 	cfg    config.Config
 	db     *store.Store
-	kc     *keycloak.Client
+	kc     Groups
 	auth   *auth.Manager
 	notify *notify.Notifier
 }
 
-func NewService(cfg config.Config, db *store.Store, kc *keycloak.Client, am *auth.Manager, n *notify.Notifier) *Service {
+func NewService(cfg config.Config, db *store.Store, kc Groups, am *auth.Manager, n *notify.Notifier) *Service {
 	return &Service{cfg: cfg, db: db, kc: kc, auth: am, notify: n}
 }
 

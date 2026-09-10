@@ -8,7 +8,7 @@ Aligned with the locked lab design:
 - Request TTL **1 hour** (timeout if no decision)  
 - Early release supported  
 - PIM app (not Keycloak Admin console) owns the workflow  
-- Access cluster: Keycloak + PIM; app cluster later for demos  
+- Access cluster: Keycloak + PIM (any Kubernetes, or Compose for local); app cluster later for demos  
 - Namespaces: Keycloak in `keycloak`; PIM in **`keycloak-pim`** (separate)  
 
 ---
@@ -19,13 +19,13 @@ Aligned with the locked lab design:
 
 | # | Done when |
 | --- | --- |
-| 1 | Lab AKS (or equivalent) can be created/destroyed via Terraform |
-| 2 | Keycloak is installed (Helm) and reachable |
+| 1 | A Compose stack or any Kubernetes cluster can host the services |
+| 2 | Keycloak is installed (Compose or Helm) and reachable |
 | 3 | Realm `pim-test` exists with groups: `admin-eligible`, `admin-active`, `admin-permanent`, `break-glass` |
 | 4 | Least-privilege `pim-service` client can grant and revoke via Admin API |
 | 5 | Fixture users exist; break-glass can authenticate with admin authority |
 | 6 | Automated plumbing test exits **PASS** |
-| 7 | One-command bootstrap documented (`scripts/bootstrap-phase0.sh`) |
+| 7 | Realm bootstrap documented (`scripts/setup.sh` / Compose import). Optional AKS lab: `deploy/infra/aks/bootstrap.sh` |
 
 **Out of scope:** PIM workflow app, timers, UI, notifications.
 
@@ -105,7 +105,7 @@ Aligned with the locked lab design:
 
 **Goal:** Harden the moment of elevation.
 
-**Lab status:** **SKIPPED** — work Keycloak is behind PKI; revisit only if policy needs MFA/`acr` at approve time or dual control. See `phase5/FINDINGS.md`.
+**Lab status:** **SKIPPED** — work Keycloak is behind PKI; revisit only if policy needs MFA/`acr` at approve time or dual control. See [phase5-FINDINGS.md](phase5-FINDINGS.md).
 
 | # | Done when |
 | --- | --- |

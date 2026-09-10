@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15  
 **Environment:** `kc-pim-aks` — Keycloak in `keycloak`, PIM in `keycloak-pim`  
-**Image:** `kcpimlabacr319.azurecr.io/pim:0.2.0`
+**Image:** lab `pim:0.2.0`
 
 ## Done
 

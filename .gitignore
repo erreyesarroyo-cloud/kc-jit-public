@@ -2,15 +2,13 @@
 .env
 *.env
 !.env.example
+!*.env.example
 
-# Phase 0 runtime artifacts
+# Lab runtime artifacts
 *.token
-phase0/.last_run
 
-# Phase 1+ engine (Go)
+# Go
 /bin/
-phase1/pf.out
-phase1/pf.err
 *.db
 *.sqlite
 *.sqlite3

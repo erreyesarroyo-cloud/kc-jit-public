@@ -1,18 +1,19 @@
 replicaCount: 1
 
 image:
-  repository: kcpimlabacr319.azurecr.io/pim
-  tag: "0.5.2"
+  # Build locally (`docker build -t keycloak-jit-access:0.1.0 .`) or point at your registry.
+  repository: keycloak-jit-access
+  tag: "0.1.0"
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
   port: 8080
 
-# Browser URL for the PIM UI (OIDC redirect_uri base). Set to Ingress IP at deploy time.
-publicURL: "http://74.179.206.145"
+# Browser URL for the PIM UI (OIDC redirect_uri base). Override at deploy time.
+publicURL: "http://localhost:8081"
 
-# Lab: nginx Ingress (install ingress-nginx first). Keycloak keeps its LoadBalancer.
+# nginx Ingress (install ingress-nginx first). Keycloak typically keeps its LoadBalancer.
 ingress:
   enabled: true
   className: nginx
@@ -26,8 +27,8 @@ ingress:
 # Cross-namespace: Keycloak stays in `keycloak`; PIM deploys to `keycloak-pim`.
 keycloak:
   baseURL: "http://keycloak.keycloak.svc.cluster.local:8080"
-  # Set at deploy time to the Keycloak Ingress URL for browser OIDC redirects.
-  publicURL: "http://keycloak.74.179.206.145.nip.io"
+  # Browser-facing Keycloak URL for OIDC redirects. Override at deploy time.
+  publicURL: "http://localhost:8080"
   realm: pim-test
   clientId: pim-service
   existingSecret: pim-service-credentials
@@ -41,8 +42,9 @@ oidc:
   # empty = publicURL + /auth/callback
   redirectURL: ""
 
-sessionSecret: "lab-only-change-me"
-allowHeaderAuth: true
+# Required. Override with --set sessionSecret=... (do not ship the placeholder).
+sessionSecret: ""
+allowHeaderAuth: false
 
 # Non-secret runtime config is rendered into ConfigMap {{ include "pim.fullname" . }}-config
 # (groups, TTLs, URLs, realm, OIDC flags). Secrets stay in K8s Secrets.
@@ -58,14 +60,14 @@ groups:
   permanent: admin-permanent
   breakGlass: break-glass
 
-# Lab-friendly defaults — shorter for demos (override in CM or helm --set).
+# Chart defaults are shorter for demos. App defaults (compose / env) are 1h / 9h.
 requestTTL: 30m
 activeTTL: 4h
 pollInterval: 15s
 
-# Phase 4 — Slack/Teams incoming webhook (URL in secret, not values).
+# Slack/Teams incoming webhook (URL in a Secret, not here).
 notify:
-  enabled: true
+  enabled: false
   existingSecret: pim-notify-webhook
   webhookUrlKey: url
 

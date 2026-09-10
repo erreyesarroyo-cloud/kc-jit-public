@@ -24,9 +24,9 @@ group model, and validate the test fixtures — before building any PIM logic.
 
 ## Files
 
-- `.env.example` — config template (copy to `.env`, fill in, never commit)
-- `setup.sh` — idempotent: creates test role, users, groups, and least-privilege PIM client
-- `plumbing_test.sh` — the exit-criteria proof (grant/revoke + group model + break-glass)
+- `.env` template — `examples/keycloak-lab.env.example` (copy to `scripts/.env`, fill in, never commit)
+- `scripts/setup.sh` — idempotent: creates test role, users, groups, and least-privilege PIM client
+- `scripts/plumbing_test.sh` — the exit-criteria proof (grant/revoke + group model + break-glass)
 
 ## Fixtures created by `setup.sh`
 
@@ -76,8 +76,8 @@ those) — do not grant it `realm-admin`.
 ## How to run
 
 ```bash
-cd phase0
-cp .env.example .env
+cd scripts
+cp ../examples/keycloak-lab.env.example .env
 # edit .env: set KC_ADMIN_USERNAME / KC_ADMIN_PASSWORD (temp admin)
 ./setup.sh            # idempotent; creates fixtures + PIM client, writes PIM_CLIENT_SECRET to .env
 ./plumbing_test.sh    # proves exit criteria; prints PASS/FAIL

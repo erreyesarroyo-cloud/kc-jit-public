@@ -5,9 +5,9 @@
 **Environment:** Same lab as Phase 0 (`keycloak` namespace on `kc-pim-aks`)
 
 ## What was built
-- Go PIM API: `phase1/` (`cmd/pim`, `internal/{api,config,keycloak,store,worker}`)
-- Dockerfile + ACR image: `kcpimlabacr082.azurecr.io/pim:0.1.0`
-- Helm chart: `charts/pim` (Deployment, Service, PVC in `keycloak` ns)
+- Go PIM API: `cmd/pim`, `internal/{api,config,keycloak,store,worker}`
+- Dockerfile + lab image: `pim:0.1.0`
+- Helm chart: `deploy/helm/pim` (Deployment, Service, PVC in `keycloak-pim` ns)
 - Lab auth: `X-Actor-Username` header (OIDC UI deferred to Phase 3)
 
 ## Flow proved
@@ -40,7 +40,7 @@ Defaults: **request TTL 1h**, **active TTL 9h**, poll/reconcile interval 30s.
 | Runs as Deployment + image | PASS |
 
 ## Issues found & fixed
-1. **Docker Desktop unavailable** — used `az acr build` + ACR `kcpimlabacr082` instead of local docker.  
+1. **Docker Desktop unavailable** — used `az acr build` + a lab ACR instead of local docker.  
 2. **SQLite CrashLoop** — PVC mounted over `/data` not writable by UID 65532; fixed with pod `fsGroup: 65532`.  
 3. **Go compile** — renamed Keycloak client token field/method clash (`cachedToken` / `accessToken()`).
 

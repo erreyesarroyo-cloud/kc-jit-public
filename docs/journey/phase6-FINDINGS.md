@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15  
 **Status:** **PASS** (ledger + chaos revoke drills)  
-**Image:** `kcpimlabacr319.azurecr.io/pim:0.5.1`
+**Image:** lab `pim:0.5.1`
 
 ## Elevation ledger
 
@@ -30,7 +30,7 @@ Final check: `admin1` **Currently active = false**; no approved orphans.
 
 ### Lab gotchas found during drills
 
-1. **Do not `scale keycloak --replicas=0` on this lab.** Chart uses `start-dev` (ephemeral DB). Scaling to 0 wiped `pim-test`; had to re-run `phase0/run-lab-setup.sh` and refresh PIM client secrets.
+1. **Do not `scale keycloak --replicas=0` on this lab.** Chart uses `start-dev` (ephemeral DB). Scaling to 0 wiped `pim-test`; had to re-run `scripts/run-lab-setup.sh` and refresh PIM client secrets.
 2. Prefer **env blackhole** (`KC_BASE_URL=http://127.0.0.1:9`) or a NetworkPolicy for “KC down” without destroying realm data.
 3. PIM PVC can keep old `approved` rows after a Keycloak wipe → DB says approved while group membership is gone. Release (or kill-switch) clears the row.
 

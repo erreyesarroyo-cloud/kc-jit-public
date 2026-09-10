@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15  
 **Status:** **PASS** (DofD met)  
-**Image:** `kcpimlabacr319.azurecr.io/pim:0.2.3`  
+**Image:** lab `pim:0.2.3`  
 **Namespace:** `keycloak-pim`
 
 ## DofD checklist

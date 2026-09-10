@@ -44,7 +44,7 @@ spec:
             - name: DB_PATH
               value: /data/pim.db
             - name: SESSION_SECRET
-              value: {{ .Values.sessionSecret | quote }}
+              value: {{ required "Set sessionSecret (helm --set sessionSecret=...)" .Values.sessionSecret | quote }}
             - name: PIM_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:

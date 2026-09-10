@@ -20,7 +20,7 @@ admin:
   existingSecretUserKey: username
   existingSecretPasswordKey: password
 
-# start-dev = embedded DB, fine for Phase 0 plumbing on free-tier AKS.
+# start-dev = embedded DB, fine for local/eval clusters.
 # Switch to "start" + external DB before any real use.
 command:
   - start-dev

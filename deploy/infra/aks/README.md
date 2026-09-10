@@ -1,6 +1,10 @@
-# AKS (Free tier) — Keycloak PIM access cluster
+# Optional lab: AKS
 
-Terraform for a small **AKS Free** control-plane cluster used as the **access / management** cluster (Keycloak + PIM later).
+This directory is **not** part of the public install path. It is the Terraform used
+to prove the first lab on Azure Kubernetes Service (Free-tier control plane).
+
+To try the project, use Docker Compose at the repo root, or the generic Helm
+charts in [`../../helm/`](../../helm/). See [`../../README.md`](../../README.md).
 
 ## Prerequisites
 
@@ -11,13 +15,19 @@ Terraform for a small **AKS Free** control-plane cluster used as the **access / 
 ## Apply
 
 ```powershell
-cd infra\aks
+cd deploy\infra\aks
 copy terraform.tfvars.example terraform.tfvars
 # edit terraform.tfvars if needed
 
 terraform init
 terraform plan
 terraform apply
+```
+
+One-shot recreate (AKS + Keycloak + Phase 0 fixtures):
+
+```bash
+./bootstrap.sh
 ```
 
 ## Kubeconfig
@@ -30,16 +40,17 @@ kubectl get nodes
 ## Install Keycloak
 
 ```powershell
-cd ..\..\charts\keycloak
+cd ..\..\helm\keycloak
 helm upgrade --install keycloak . -n keycloak --create-namespace
 ```
 
 ## Destroy
 
-```powershell
-cd infra\aks
-terraform destroy
+```bash
+./destroy.sh
 ```
+
+or `terraform destroy` in this directory.
 
 ## Notes
 

@@ -5,9 +5,10 @@
 **Environment:** Azure AKS Free tier (`kc-pim-aks` / `kc-pim-rg`), Keycloak 26.3.3 (Helm `start-dev`)
 
 ## What was built
-- Terraform: `infra/aks` (AKS Free, 1× Standard_B2s)
-- Helm chart: `charts/keycloak`
-- Scripts: `setup.sh`, `plumbing_test.sh`, `run-lab-setup.sh`, `scripts/bootstrap-phase0.sh`
+- Terraform: `deploy/infra/aks` (AKS Free, 1× Standard_B2s)
+- Helm chart: `deploy/helm/keycloak`
+- Scripts: `scripts/setup.sh`, `scripts/plumbing_test.sh`, `scripts/run-lab-setup.sh`
+- Optional AKS lab bootstrap: `deploy/infra/aks/bootstrap.sh`
 
 ## Locked group model (fixtures)
 | Group | Purpose | Standing role |
@@ -34,7 +35,7 @@ Also: realm `pim-test`, client `pim-service` (least-privilege: view/manage/query
 6. Service account can add/remove user on `admin-active`  
 
 ## Ops notes
-- Daily lab pattern: `bootstrap-phase0.sh` (or TF + Helm + `run-lab-setup.sh`) → work → `terraform destroy`  
+- Daily lab pattern: `deploy/infra/aks/bootstrap.sh` (or TF + Helm + `run-lab-setup.sh`) → work → `terraform destroy`  
 - Keycloak health probes must use management port **9000** (KC 25+)  
 - Admin console lab password default: `admin` / `ChangeMe-LabOnly!`  
 - Do not commit `.env` (contains `PIM_CLIENT_SECRET`)

@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Recreate lab AKS + Keycloak + Phase 0 fixtures in one shot.
+# LAB ONLY — recreate the original AKS lab (not required to run this project).
+# Prefer: docker compose up --build   or   helm charts in deploy/helm/
+#
 # Prerequisites: az login, terraform, helm, kubectl, curl, jq, bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-AKS_DIR="${ROOT}/infra/aks"
-CHART_DIR="${ROOT}/charts/keycloak"
-PHASE0_DIR="${ROOT}/phase0"
+AKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "${AKS_DIR}/../../.." && pwd)"
+CHART_DIR="${ROOT}/deploy/helm/keycloak"
+SCRIPTS_DIR="${ROOT}/scripts"
 
-echo "==> Terraform apply (AKS Free tier)"
+echo "==> Terraform apply (optional AKS lab)"
 cd "${AKS_DIR}"
 if [[ ! -f terraform.tfvars ]]; then
   cp terraform.tfvars.example terraform.tfvars
@@ -48,11 +50,9 @@ for i in $(seq 1 60); do
 done
 
 echo "==> Phase 0 setup (realm, groups, users, pim-service)"
-# Export URL for run-lab-setup; script will rewrite .env
 export KC_LAB_BASE_URL="${KC_URL}"
-sed -i 's/\r$//' "${PHASE0_DIR}/run-lab-setup.sh" "${PHASE0_DIR}/setup.sh" "${PHASE0_DIR}/plumbing_test.sh"
-# Patch run-lab-setup to use discovered URL if KC_LAB_BASE_URL is set
-bash "${PHASE0_DIR}/run-lab-setup.sh"
+sed -i 's/\r$//' "${SCRIPTS_DIR}/run-lab-setup.sh" "${SCRIPTS_DIR}/setup.sh" "${SCRIPTS_DIR}/plumbing_test.sh"
+bash "${SCRIPTS_DIR}/run-lab-setup.sh"
 
 echo ""
 echo "PHASE 0 LAB READY"

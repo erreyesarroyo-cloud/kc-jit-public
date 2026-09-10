@@ -16,7 +16,7 @@ activation of admin roles, with tamper-proof audit.
 |------|----------|
 | Lead self-approval | Allowed (accepted, calculated risk) — but flagged + alerted |
 | Request validity (time to approve) | 1 hour — request expires if not approved |
-| Role activation duration | 12 hours once activated |
+| Role activation duration | 9 hours once activated |
 | Approval fallback | Leads -> DevOps -> Site lead (escalation) |
 | Primary control (given self-approval) | Tamper-proof audit + alerting |
 
@@ -28,7 +28,7 @@ Request created --(must be approved within 1h)--> Approved
                                                      v
                                               Role granted
                                                      |
-                                            (active for 12h)
+                                            (active for 9h)
                                                      v
                                               Auto-revoked
 ```
@@ -55,7 +55,7 @@ Request created --(must be approved within 1h)--> Approved
 - Eligible-vs-active model: strip standing admin roles, define eligible list.
 - Activate endpoint: grant role via Admin REST API, persist `expires_at`
   (durable).
-- Auto-revoke scheduler at 12h.
+- Auto-revoke scheduler at 9h.
 - Startup reconciliation: on boot, revoke anything past expiry
   (heals missed revokes).
 - Failure alerting on revoke errors + retry.
@@ -77,7 +77,7 @@ Request created --(must be approved within 1h)--> Approved
 *Goal: users can request without ops involvement.*
 
 - Web UI (or CLI): list eligible roles, request with justification + duration.
-- Request TTL (1h to get approved) + role duration (12h).
+- Request TTL (1h to get approved) + role duration (9h).
 - Early release ("deactivate now") button.
 - "My active grants" view with countdown.
 - **Exit criteria:** a dev can self-activate (auto-approve path) end-to-end,
@@ -150,11 +150,11 @@ access-control gate.
 roles:
   realm-admin:
     request_ttl: 1h        # approval must happen within this
-    active_duration: 12h   # role held once activated
+    active_duration: 9h    # role held once activated
     approvals_required: 1
     allow_self_approval: true
     on_self_approval: notify   # flag + alert, don't block
-    early_release: true        # user can deactivate before 12h
+    early_release: true        # user can deactivate before 9h
     approver_tiers:
       - group: pim-approvers-leads
         escalate_after: 15m
@@ -163,7 +163,7 @@ roles:
       - group: pim-approvers-site-lead   # break-glass approver
   master-admin:
     request_ttl: 1h
-    active_duration: 12h
+    active_duration: 9h
     approvals_required: 2                 # dual control for crown jewels
     allow_self_approval: false
     approver_tiers:

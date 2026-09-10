@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-15  
 **Status:** **PASS** (DofD met)  
-**Image:** `kcpimlabacr319.azurecr.io/pim:0.3.0`  
+**Image:** lab `pim:0.3.0`  
 **Namespace:** `keycloak-pim`  
 **Channel:** Slack free workspace → `#new-channel` (Incoming Webhook)
 
@@ -35,9 +35,10 @@ kubectl -n keycloak-pim create secret generic pim-notify-webhook `
   --dry-run=client -o yaml | kubectl apply -f -
 
 $KC_IP = kubectl get svc keycloak -n keycloak -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-helm upgrade --install pim ./charts/pim -n keycloak-pim `
-  --set image.repository=kcpimlabacr319.azurecr.io/pim `
+helm upgrade --install pim ./deploy/helm/pim -n keycloak-pim `
+  --set image.repository=keycloak-jit-access `
   --set image.tag=0.3.0 `
+  --set sessionSecret="$(openssl rand -hex 32)" `
   --set notify.enabled=true `
   --set keycloak.publicURL="http://${KC_IP}:8080" `
   --set publicURL="http://127.0.0.1:8081"
@@ -47,7 +48,7 @@ kubectl -n keycloak-pim port-forward svc/pim 8081:8080
 
 ## Implementation notes
 
-- Package: `phase1/internal/notify` — Slack/Teams-style `{"text":"..."}` POST.
+- Package: `internal/notify` — Slack/Teams-style `{"text":"..."}` POST.
 - Env: `NOTIFY_WEBHOOK_URL` from secret `pim-notify-webhook` / key `url`.
 - Helm: `notify.enabled=true` + `notify.existingSecret`.
 - **Rocket.Chat / Teams:** same webhook pattern; swap URL in the secret (Slack-compatible payloads often work; adjust JSON if needed).

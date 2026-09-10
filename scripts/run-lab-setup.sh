@@ -9,7 +9,7 @@ mkdir -p "$WORK"
 cp "$SRC_DIR/setup.sh" "$SRC_DIR/plumbing_test.sh" "$WORK/"
 sed -i 's/\r$//' "$WORK/setup.sh" "$WORK/plumbing_test.sh"
 
-# Prefer KC_LAB_BASE_URL (set by scripts/bootstrap-phase0.sh), else discover LB IP.
+# Prefer KC_LAB_BASE_URL (any Keycloak URL), else discover a keycloak Service LB IP.
 if [[ -z "${KC_LAB_BASE_URL:-}" ]]; then
   LB_IP=$(kubectl get svc keycloak -n keycloak -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
   if [[ -n "${LB_IP}" ]]; then

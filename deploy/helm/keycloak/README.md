@@ -1,32 +1,33 @@
 # Keycloak (lab Helm chart)
 
-Single-replica Keycloak using `start-dev` for the PIM **access** cluster on free-tier AKS.
+Single-replica Keycloak using `start-dev`. Works on any Kubernetes cluster.
+
+This is for evaluation, not production HA.
 
 ## Install
 
-```powershell
-# after AKS kubeconfig is configured
-helm upgrade --install keycloak . -n keycloak --create-namespace `
-  --set admin.password="YourLabPassword"
+```bash
+helm upgrade --install keycloak . -n keycloak --create-namespace \
+  --set admin.password='YourLabPassword'
 ```
 
 ## Access
 
-```powershell
+```bash
 kubectl get svc -n keycloak
-# EXTERNAL-IP from the LoadBalancer → http://<EXTERNAL-IP>:8080
+# If service.type=LoadBalancer: http://<EXTERNAL-IP>:8080
 ```
 
 Admin console: username `admin` (or `admin.username`), password from `--set` / Secret.
 
-## Next (Phase 0)
+## Realm groups this service expects
 
-Create groups on this Keycloak:
+Create these (see `scripts/setup.sh` or the Compose realm import):
 
 - `admin-eligible`
-- `admin-active` (standing master role)
-- `admin-approved` (JIT master role via group)
-- `break-glass` (standing master role)
+- `admin-active`
+- `admin-permanent`
+- `break-glass`
 
 ## Not for production
 

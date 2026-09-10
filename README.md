@@ -140,8 +140,10 @@ See [`examples/keycloak-lab.env.example`](examples/keycloak-lab.env.example) for
 
 ## Deployment
 
-- **Helm:** charts for Keycloak and the service live in [`deploy/helm/`](deploy/helm/).
-- **Infra (reference):** example AKS Terraform lives in [`deploy/infra/`](deploy/infra/).
+1. **Docker Compose** (above) — the supported way to try the project.
+2. **Helm** — charts in [`deploy/helm/`](deploy/helm/) target any Kubernetes cluster. They are not Azure-specific.
+
+You do not need Azure or AKS to run this. The original lab was proven on AKS; that optional Terraform lives in [`deploy/infra/aks/`](deploy/infra/aks/) for anyone reproducing the old lab, not as a required install path.
 
 ## Security
 
@@ -153,7 +155,7 @@ option.
 ## Documentation
 
 - [Architecture & design decisions](docs/journey/PHASES.md)
-- [Build journey / findings](docs/journey/) — the phased lab notes this project grew from.
+- [Build journey / findings](docs/journey/) — lab notes from the original AKS proof; not required to operate the service.
 
 ## Contributing
 

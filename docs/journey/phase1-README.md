@@ -17,22 +17,22 @@ Go service that implements time-bound Keycloak elevation:
 ## Build image (local)
 
 ```bash
-cd phase1
-docker build -t pim:0.1.0 .
+docker build -t keycloak-jit-access:0.1.0 .
 ```
 
 ## Deploy (after Phase 0 on cluster)
 
 ```bash
-# secret from phase0/.env PIM_CLIENT_SECRET (PIM ns, not Keycloak ns)
+# secret from scripts/.env PIM_CLIENT_SECRET (PIM ns, not Keycloak ns)
 kubectl create namespace keycloak-pim --dry-run=client -o yaml | kubectl apply -f -
 kubectl -n keycloak-pim create secret generic pim-service-credentials \
   --from-literal=client-secret="$PIM_CLIENT_SECRET" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # load image into AKS node if not using a registry (lab): use ACR or docker save/import
-helm upgrade --install pim ../charts/pim -n keycloak-pim \
-  --set image.repository=pim --set image.tag=0.1.0
+helm upgrade --install pim ../deploy/helm/pim -n keycloak-pim \
+  --set image.repository=keycloak-jit-access --set image.tag=0.1.0 \
+  --set sessionSecret="$(openssl rand -hex 32)"
 ```
 
 ## Smoke test
