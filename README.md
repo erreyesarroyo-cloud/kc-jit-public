@@ -154,6 +154,12 @@ You do not need Azure or AKS to run this. The original lab was proven on AKS; th
 service-account roles, the threat model, and the (deliberate, flagged) self-approval
 option.
 
+**You operate this at your own risk.** This is community software, not a hosted
+service. Anyone who deploys it is responsible for their Keycloak realm, access
+decisions, secrets, and what elevated accounts do. The authors are not liable
+for misuse, outages, or data loss. See the [Apache License 2.0](LICENSE)
+disclaimer of warranty and limitation of liability.
+
 ## Documentation
 
 - [Architecture & design decisions](docs/journey/PHASES.md)
@@ -166,4 +172,5 @@ Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and
 
 ## License
 
-[Apache License 2.0](LICENSE).
+[Apache License 2.0](LICENSE). Provided **AS IS**, without warranty; you assume
+the risk of use (see LICENSE sections 7–8).

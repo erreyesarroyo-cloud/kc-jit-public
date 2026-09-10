@@ -4,6 +4,13 @@
 account for your Keycloak realm and can add/remove users from admin groups. Treat
 it with the same care as any other privileged-access-management (PAM) system.
 
+**Operator responsibility.** This project is provided as-is under Apache 2.0.
+You (the person or organization that deploys it) are responsible for how it is
+configured and used, including who can request or approve elevation and what
+those accounts do with that access. The maintainers are not responsible for
+your production Keycloak, your policies, or damage from misuse or
+misconfiguration.
+
 ## Reporting a vulnerability
 
 Please **do not** open a public issue for security problems. Report them privately
